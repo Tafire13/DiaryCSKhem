@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Photo Diary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body class="bg-black text-gray-100 font-sans antialiased min-h-screen">
+
+    <nav class="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-md border-b border-gray-800">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-camera-retro text-2xl text-blue-500"></i>
+                <span class="text-xl font-bold tracking-wide">MyDiary</span>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <span class="text-gray-400 text-sm hidden sm:block">
+                    Welcome, <span class="text-white font-semibold">
+                        <%= user.username %>
+                    </span>
+                </span>
+                <a href="/logout"
+                    class="text-sm bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition-colors border border-gray-700">
+                    Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="max-w-6xl mx-auto px-4 py-10 text-center relative">
+        <h1 class="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 mb-4">
+            Your Memories
+        </h1>
+        <p class="text-gray-400 mb-8">เก็บรวบรวมช่วงเวลาดีๆ ไว้ในที่เดียว</p>
+
+        <label class="cursor-pointer inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-full font-semibold shadow-lg shadow-blue-500/30 transform hover:scale-105 transition-all">
+            <i class="fa-solid fa-plus"></i>
+            <span>เพิ่มไดอารี่ใหม่</span>
+            <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="openPreview(event)">
+        </label>
+    </header>
+
+    <div id="uploadModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        
+        <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative">
+            
+            <button type="button" onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white z-10 bg-black/50 rounded-full w-8 h-8 flex items-center justify-center">
+                <i class="fa-solid fa-times"></i>
+            </button>
+
+            <form action="/add-diary" method="POST" enctype="multipart/form-data">
+                
+                <div class="h-64 bg-gray-800 relative group">
+                    <img id="imagePreview" src="" alt="Preview" class="w-full h-full object-cover">
+                </div>
+
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">หัวข้อ</label>
+                        <input type="text" name="title" required placeholder="วันนี้ไปเที่ยวไหนมา..." 
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">ความทรงจำ</label>
+                        <textarea name="description" rows="3" placeholder="เล่าเรื่องราวหน่อย..." 
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-3 rounded-xl shadow-lg transform transition-transform active:scale-95">
+                        บันทึกความทรงจำ
+                    </button>
+                </div>
+
+                <input type="file" name="image" id="realFileInput" class="hidden">
+            </form>
+        </div>
+    </div>
+
+    <main class="max-w-6xl mx-auto px-4 pb-20">
+
+        <% if (typeof diaries !=='undefined' && diaries.length> 0) { %>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                <% diaries.forEach(function(item) { %>
+                    <div class="group bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-gray-600 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-900/10">
+
+                        <div class="relative h-64 overflow-hidden">
+                            <img src="<%= item.image %>" alt="Diary Image"
+                                class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+
+                            <div class="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-xs px-3 py-1 rounded-full text-gray-300 border border-white/10">
+                                <%= item.date %>
+                            </div>
+                        </div>
+
+                        <div class="p-5">
+                            <h3 class="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                                <%= item.title %>
+                            </h3>
+                            <p class="text-gray-400 text-sm line-clamp-2">
+                                <%= item.description %>
+                            </p>
+
+                            <div class="mt-4 pt-4 border-t border-gray-800 flex justify-between items-center">
+                                <span class="text-xs text-gray-500">By <%= item.username %></span>
+                                <button class="text-gray-400 hover:text-white transition-colors">
+                                    <i class="fa-regular fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <% }); %>
+            </div>
+
+            <% } else { %>
+
+                <div class="text-center py-20 border-2 border-dashed border-gray-800 rounded-3xl">
+                    <i class="fa-regular fa-images text-6xl text-gray-700 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-400">ยังไม่มีไดอารี่</h3>
+                    <p class="text-gray-600 mt-2">เริ่มบันทึกความทรงจำแรกของคุณเลย!</p>
+                </div>
+
+                <% } %>
+
+    </main>
+
+    <script>
+        function openPreview(event) {
+            const file = event.target.files[0];
+            if (file) {
+                // 1. แสดงรูป Preview
+                const previewUrl = URL.createObjectURL(file);
+                document.getElementById('imagePreview').src = previewUrl;
+                
+                // 2. ย้ายไฟล์ไปใส่ใน Form (input ที่ซ่อนอยู่)
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                document.getElementById('realFileInput').files = dataTransfer.files;
+
+                // 3. เปิด Modal
+                document.getElementById('uploadModal').classList.remove('hidden');
+            }
+        }
+
+        function closeModal() {
+            // ปิด Modal
+            document.getElementById('uploadModal').classList.add('hidden');
+            // ล้างค่า
+            document.getElementById('fileInput').value = ''; 
+        }
+    </script>
+
+</body>
+</html>
